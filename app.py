@@ -12,7 +12,7 @@ CORS(app)
 # MongoDB Atlas URI desde variable de entorno
 MONGO_URI = os.environ.get("MONGO_URI")
 client = MongoClient(MONGO_URI)
-db = client["BasePryEsp32"]
+db = client["Proyecto_Mongo_ESP32"]
 collection = db["Datos"]
 
 # Ruta para recibir datos del ESP32
