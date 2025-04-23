@@ -20,24 +20,46 @@ collection = db["Datos"]
 def recibir_dato():
     try:
         data = request.get_json()
+        # Campos obligatorios
         required_keys = ["dispositivo", "temperatura", "humedad"]
         if not all(k in data for k in required_keys):
-            return jsonify({"error": "Faltan campos en el JSON"}), 400
+            return jsonify({"error": "Faltan campos obligatorios en el JSON"}), 400
 
+        # Validar tipos de datos
+        try:
+            temperatura = float(data["temperatura"])
+            humedad = float(data["humedad"])
+        except (ValueError, TypeError):
+            return jsonify({"error": "Temperatura o humedad no son valores numéricos válidos"}), 400
+
+        # Crear documento con campos obligatorios
         documento = {
-            "dispositivo": data["dispositivo"],
-            "temperatura": data["temperatura"],
-            "humedad": data["humedad"],
+            "dispositivo": str(data["dispositivo"]),
+            "temperatura": temperatura,
+            "humedad": humedad,
             "timestamp": datetime.utcnow() - timedelta(hours=6)
         }
 
+        # Agregar campos opcionales si están presentes
+        if "luz" in data:
+            try:
+                documento["luz"] = int(data["luz"])
+            except (ValueError, TypeError):
+                return jsonify({"error": "El campo luz debe ser un valor numérico"}), 400
+
+        if "intensidad_luz" in data:
+            documento["intensidad_luz"] = str(data["intensidad_luz"])
+
+        if "movimiento" in data:
+            documento["movimiento"] = str(data["movimiento"])
+
+        # Insertar en MongoDB
         collection.insert_one(documento)
         return jsonify({"message": "Datos guardados correctamente"}), 200
 
     except Exception as e:
-        print("Error al guardar en MongoDB:", str(e))  # <-- Esto aparecerá en los logs de Render
+        print("Error al guardar en MongoDB:", str(e))  # Aparecerá en los logs de Render
         return jsonify({"error": "Error al guardar en la base de datos"}), 500
-
 
 # Ruta para ver los últimos 50 datos
 @app.route("/api/datos", methods=["GET"])
