@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pryMongoEsp32
+    name: ProyectoMongoESP32
     runtime: python
     repo: https://github.com/AsaelitoTapia/Proyecto_Mongo_ESP32
     plan: free
